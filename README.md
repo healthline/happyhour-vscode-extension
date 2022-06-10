@@ -4,13 +4,13 @@ This is the Visual Studio Code extension for automatic capitalization tracking v
 
 ## Installation
 
-Download [happyhour-latest.vsix](https://github.com/healthline/happyhour-vscode-extension/blob/main/happyhour-latest.vsix) and move it to your VS Code extensions folder .vscode/extensions:
+Download [happyhour-latest.vsix](https://github.com/healthline/happyhour-vscode-extension/blob/main/happyhour-latest.vsix).
 
-- macOS: ~/.vscode/extensions
-- Linux: ~/.vscode/extensions
-- Windows: %USERPROFILE%\.vscode\extensions
+Within VS Code:
 
-NOTE: this extension has only been tested on macOS. If you work on another platform, please let me know if it works or if you have issues (slack @danelson).
+1. Click the ellipses in the upper-right corner of the Extensions sidebar
+2. Click `Install from VSIX…`
+3. Select `happyhour-latest.vsix` from your downloads folder
 
 ## Initialization
 
