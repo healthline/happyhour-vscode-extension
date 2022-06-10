@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import axios, { AxiosError } from 'axios'
+import axios, { Axios, AxiosError } from 'axios'
 import { exec, ExecFileException } from 'child_process'
 import * as fs from 'fs'
 import throttle from 'lodash.throttle'
@@ -26,12 +26,11 @@ export const init = async () => {
     // validateInput: Utils.apiKeyInvalid.bind(this),
   };
 
-  vscode.window.showInputBox(promptOptions).then(async (val) => {
-    if (val) {
-      yamlData.apiToken = val.trim()
-      await writeConfig(YAML.stringify({ api_token: yamlData.apiToken }))
-    }
- })
+  const val = await vscode.window.showInputBox(promptOptions)
+  if (val) {
+    yamlData.apiToken = val.trim()
+    await writeConfig(YAML.stringify({ api_token: yamlData.apiToken }))
+  }
 }
 
 async function track(document: vscode.TextDocument) {
@@ -45,28 +44,27 @@ async function track(document: vscode.TextDocument) {
   const branch = await gitBranch(document.fileName)
   if (!branch) return
   const headers = { Authorization: `Bearer ${yamlData.apiToken}` }
-  const data = { branch: branch }
+  const data = { branch }
 
-  axios
-    .post(url, data, { headers: headers })
-    .then(() => {
-      if (notify_after_successful_track) {
-        notify_after_successful_track = false
-        vscode.window.showInformationMessage(`Happyhour successfully tracked ${branch}`)
-      }
-    })
-    .catch((error: AxiosError) => {
-      if (error.response) {
-        notify_after_successful_track = true
-        if (error.response.status === 401)
-          vscode.window.showErrorMessage(`Invalid happyhour API token. Visit ${HOST}/api_tokens for a new token, then run \`Happyhour init\`.`)
-        else
-          vscode.window.showErrorMessage(`Happyhour error: status ${error.response.status}`)
-      } else {
-        notify_after_successful_track = true
-        vscode.window.showErrorMessage(`Happyhour error. Are you able to reach ${HOST} in a browser?`)
-      }
-    })
+  try {
+    await axios.post(url, data, { headers: headers })
+    if (notify_after_successful_track) {
+      notify_after_successful_track = false
+      vscode.window.showInformationMessage(`Happyhour successfully tracked ${branch}`)
+    }
+  } catch(err) {
+    const error: AxiosError = err as AxiosError
+    if (error.response) {
+      notify_after_successful_track = true
+      if (error.response.status === 401)
+        vscode.window.showErrorMessage(`Invalid happyhour API token. Visit ${HOST}/api_tokens for a new token, then run \`Happyhour init\`.`)
+      else
+        vscode.window.showErrorMessage(`Happyhour error: status ${error.response.status}`)
+    } else {
+      notify_after_successful_track = true
+      vscode.window.showErrorMessage(`Happyhour error. Are you able to reach ${HOST} in a browser?`)
+    }
+  }
 }
 
 async function gitBranch(modifiedFilePath: string) {
