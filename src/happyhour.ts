@@ -2,11 +2,13 @@ import * as vscode from 'vscode';
 import axios, { Axios, AxiosError } from 'axios'
 import { exec, ExecFileException } from 'child_process'
 import * as fs from 'fs'
+import * as path from 'path'
+import os from 'os'
 import throttle from 'lodash.throttle'
 import * as YAML from 'yaml'
 import findConfig from 'find-config'
 
-const CONFIG_FILE = `${process.env.HOME}/.happyhour`
+const CONFIG_FILE = path.join(os.homedir(), '.happyhour')
 const HOST = 'https://happyhour.rvapps.io'
 const API_URL = `${HOST}/api/v1/work_stream_entries`
 const THROTTLE_SECONDS = 10
