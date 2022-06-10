@@ -13,6 +13,7 @@ const HOST = 'https://happyhour.rvapps.io'
 const API_URL = `${HOST}/api/v1/work_stream_entries`
 const THROTTLE_SECONDS = 10
 let notify_after_successful_track: Boolean = false
+const outputChannel = vscode.window.createOutputChannel('happyhour')
 
 const throttledTrack = throttle(track, THROTTLE_SECONDS * 1000)
 export const watch = () => vscode.workspace.onDidSaveTextDocument(throttledTrack)
@@ -50,21 +51,32 @@ async function track(document: vscode.TextDocument) {
 
   try {
     await axios.post(url, data, { headers: headers })
+    outputChannel.appendLine(`tracked: ${branch}`)
+
     if (notify_after_successful_track) {
       notify_after_successful_track = false
-      vscode.window.showInformationMessage(`Happyhour successfully tracked ${branch}`)
+      vscode.window.showInformationMessage(`Happyhour successfully tracked: ${branch}`)
     }
+
   } catch(err) {
     const error: AxiosError = err as AxiosError
+
     if (error.response) {
       notify_after_successful_track = true
-      if (error.response.status === 401)
-        vscode.window.showErrorMessage(`Invalid happyhour API token. Visit ${HOST}/api_tokens for a new token, then run \`Happyhour init\`.`)
-      else
-        vscode.window.showErrorMessage(`Happyhour error: status ${error.response.status}`)
+      if (error.response.status === 401) {
+        const message = `Invalid happyhour API token. Visit ${HOST}/api_tokens for a new token, then run \`Happyhour init\`.`
+        outputChannel.appendLine(message)
+        vscode.window.showErrorMessage(message)
+      } else {
+        const message = `Happyhour error: status ${error.response.status}`
+        outputChannel.appendLine(message)
+        vscode.window.showErrorMessage(message)
+      }
     } else {
       notify_after_successful_track = true
-      vscode.window.showErrorMessage(`Happyhour error. Are you able to reach ${HOST} in a browser?`)
+      const message = `Happyhour error. Are you able to reach ${HOST} in a browser?`
+      outputChannel.appendLine(message)
+      vscode.window.showErrorMessage(message)
     }
   }
 }
