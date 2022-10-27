@@ -1,3 +1,12 @@
+# Generate new .vsix package
+
+From the project root:
+
+```bash
+  $ vsce package
+```
+
+
 # happyhour README
 
 This is the Visual Studio Code extension for automatic capitalization tracking via [happyhour](https://happyhour.rvapps.io).
